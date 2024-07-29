@@ -41,6 +41,21 @@ public class GutendexAPI {
     }
 
     /**
+     * Lista os top 10 livros mais baixados utilizando a API Gutendex.
+     *
+     * @return uma lista dos top 10 livros mais baixados
+     * @throws Exception se ocorrer um erro na requisição HTTP
+     */
+    public List<Livro> listarTop10LivrosMaisBaixados() throws Exception {
+        String url = BASE_URL + "?sort=downloads&languages=en";
+        String jsonResponse = fazerRequisicaoHTTP(url);
+
+        // Parse JSON response
+        JsonObject jsonObject = JsonParser.parseString(jsonResponse).getAsJsonObject();
+        return parseLivrosFromJson(jsonObject).subList(0, 10);
+    }
+
+    /**
      * Faz uma requisição HTTP para a URL fornecida.
      *
      * @param urlString a URL para a qual a requisição será feita
