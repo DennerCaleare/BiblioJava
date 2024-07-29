@@ -11,7 +11,7 @@ public class TesteBuscaERegistroAutor {
 
         try {
             // Buscar e registrar autor
-            String nomeAutor = "Machado de Assis";
+            String nomeAutor = "Clarice Lispector";
             autorService.buscarERegistrarAutor(nomeAutor);
             System.out.println("Autor registrado: " + nomeAutor);
 

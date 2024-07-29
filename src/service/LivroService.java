@@ -1,10 +1,13 @@
 package service;
 
 import dao.FileUtil;
+import model.Autor;
 import model.Livro;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -34,5 +37,33 @@ public class LivroService {
         return livros.stream()
                 .filter(livro -> livro.getIdioma().equalsIgnoreCase(idioma))
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Calcula a média de downloads por autor.
+     *
+     * @return um mapa contendo autores e suas médias de downloads
+     * @throws IOException se ocorrer um erro ao carregar os livros
+     */
+    public Map<Autor, Double> calcularMediaDownloadsPorAutor() throws IOException {
+        List<Livro> livros = listarTodosOsLivros();
+        Map<Autor, Integer> totalDownloadsPorAutor = new HashMap<>();
+        Map<Autor, Integer> quantidadeLivrosPorAutor = new HashMap<>();
+
+        for (Livro livro : livros) {
+            Autor autor = livro.getAutor();
+            totalDownloadsPorAutor.put(autor, totalDownloadsPorAutor.getOrDefault(autor, 0) + livro.getDownloads());
+            quantidadeLivrosPorAutor.put(autor, quantidadeLivrosPorAutor.getOrDefault(autor, 0) + 1);
+        }
+
+        Map<Autor, Double> mediaDownloadsPorAutor = new HashMap<>();
+        for (Map.Entry<Autor, Integer> entry : totalDownloadsPorAutor.entrySet()) {
+            Autor autor = entry.getKey();
+            int totalDownloads = entry.getValue();
+            int quantidadeLivros = quantidadeLivrosPorAutor.get(autor);
+            mediaDownloadsPorAutor.put(autor, (double) totalDownloads / quantidadeLivros);
+        }
+
+        return mediaDownloadsPorAutor;
     }
 }
