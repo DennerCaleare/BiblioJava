@@ -94,4 +94,16 @@ public class LivroService {
     public List<Livro> listarTop10LivrosMaisBaixados() throws Exception {
         return gutendexAPI.listarTop10LivrosMaisBaixados();
     }
+
+    /**
+     * Busca detalhes de um livro pelo título utilizando a API Gutendex.
+     *
+     * @param titulo o título do livro a ser buscado
+     * @return o livro detalhado ou null se não encontrado
+     * @throws Exception se ocorrer um erro na requisição HTTP
+     */
+    public Livro buscarLivroDetalhado(String titulo) throws Exception {
+        List<Livro> livros = gutendexAPI.buscarLivrosPorTitulo(titulo);
+        return livros.isEmpty() ? null : livros.get(0);
+    }
 }

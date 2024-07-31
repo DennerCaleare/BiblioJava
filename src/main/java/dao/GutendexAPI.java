@@ -13,6 +13,7 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -96,14 +97,17 @@ public class GutendexAPI {
             String titulo = livroJson.get("title").getAsString();
             String idioma = livroJson.get("languages").getAsJsonArray().get(0).getAsString();
             int downloads = livroJson.get("download_count").getAsInt();
+            int anoPublicacao = livroJson.has("issued") ? livroJson.get("issued").getAsInt() : 0;
 
             // Extrair informações do autor
             JsonObject autorJson = livroJson.getAsJsonArray("authors").get(0).getAsJsonObject();
             String nomeAutor = autorJson.get("name").getAsString();
-            Autor autor = new Autor(nomeAutor, null, null);
+            String dataNascimento = autorJson.has("birth_year") ? autorJson.get("birth_year").getAsString() : "N/A";
+            String nacionalidade = autorJson.has("nationality") ? autorJson.get("nationality").getAsString() : "N/A";
 
+            Autor autor = new Autor(nomeAutor, new Date(), nacionalidade);
             // Criar objeto Livro e adicionar à lista
-            Livro livro = new Livro(titulo, autor, 0, idioma, downloads);
+            Livro livro = new Livro(titulo, autor, anoPublicacao, idioma, downloads);
             livros.add(livro);
         }
 

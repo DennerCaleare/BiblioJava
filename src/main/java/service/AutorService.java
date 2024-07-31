@@ -31,43 +31,47 @@ public class AutorService {
     }
 
     /**
-     * Lista autores que estavam vivos em um determinado ano.
+     * Lista autores vivos em um ano específico.
      *
-     * @param ano o ano para verificar os autores vivos
-     * @return uma lista de autores que estavam vivos no ano especificado
+     * @param anoInicial o ano inicial para filtrar os autores
+     * @param anoFinal o ano final para filtrar os autores
+     * @return uma lista de autores vivos no ano especificado
      * @throws IOException se ocorrer um erro ao carregar os autores
      */
-    public List<Autor> listarAutoresVivosEmAno(int ano) throws IOException {
+    public List<Autor> listarAutoresVivosEmAno(int anoInicial, int anoFinal) throws IOException {
         List<Autor> autores = listarTodosOsAutores();
         return autores.stream()
-                .filter(autor -> autor.getDataNascimento() != null && autor.getDataNascimento().getYear() <= ano)
+                .filter(autor -> autor.getDataNascimento().getYear() + 1900 <= anoFinal && autor.getDataNascimento().getYear() + 1900 >= anoInicial)
                 .collect(Collectors.toList());
     }
 
     /**
-     * Busca informações sobre um autor e registra suas obras no sistema.
+     * Busca e registra um autor pelo nome utilizando a API Gutendex.
      *
      * @param nomeAutor o nome do autor a ser buscado
-     * @throws Exception se ocorrer um erro na busca ou no registro
+     * @throws Exception se ocorrer um erro na requisição HTTP
      */
     public void buscarERegistrarAutor(String nomeAutor) throws Exception {
-        List<Livro> livrosDoAutor = gutendexAPI.buscarLivrosPorTitulo(nomeAutor);
-        List<Autor> autores = listarTodosOsAutores();
-        boolean autorExistente = autores.stream().anyMatch(autor -> autor.getNome().equalsIgnoreCase(nomeAutor));
-
-        if (!autorExistente && !livrosDoAutor.isEmpty()) {
-            Autor novoAutor = livrosDoAutor.get(0).getAutor();
-            autores.add(novoAutor);
-            FileUtil.salvarAutores(autores);
-        }
-
-        // Adicionar livros do autor ao sistema
-        List<Livro> livrosExistentes = FileUtil.carregarLivros();
-        for (Livro livro : livrosDoAutor) {
-            if (livrosExistentes.stream().noneMatch(l -> l.getTitulo().equalsIgnoreCase(livro.getTitulo()))) {
-                livrosExistentes.add(livro);
+        List<Livro> livros = gutendexAPI.buscarLivrosPorTitulo(nomeAutor);
+        if (!livros.isEmpty()) {
+            Autor autor = livros.get(0).getAutor();
+            List<Autor> autores = listarTodosOsAutores();
+            if (autores.stream().noneMatch(a -> a.getNome().equals(autor.getNome()))) {
+                autores.add(autor);
+                FileUtil.salvarAutores(autores);
             }
         }
-        FileUtil.salvarLivros(livrosExistentes);
+    }
+
+    /**
+     * Busca detalhes de um autor pelo nome utilizando a API Gutendex.
+     *
+     * @param nomeAutor o nome do autor a ser buscado
+     * @return o autor detalhado ou null se não encontrado
+     * @throws Exception se ocorrer um erro na requisição HTTP
+     */
+    public Autor buscarAutorDetalhado(String nomeAutor) throws Exception {
+        List<Livro> livros = gutendexAPI.buscarLivrosPorTitulo(nomeAutor);
+        return livros.isEmpty() ? null : livros.get(0).getAutor();
     }
 }

@@ -37,12 +37,21 @@ public class MainApp extends Application {
         TextField txtBuscarTitulo = new TextField();
         txtBuscarTitulo.setPromptText("Buscar Livro pelo Título");
         Button btnBuscarLivro = new Button("Buscar Livro");
-        TextField txtBuscarIdioma = new TextField();
-        txtBuscarIdioma.setPromptText("Buscar Livros por Idioma");
+        ComboBox<String> comboBuscarIdioma = new ComboBox<>();
+        comboBuscarIdioma.getItems().addAll("Inglês", "Português", "Espanhol");
+        comboBuscarIdioma.setPromptText("Buscar Livros por Idioma");
         Button btnBuscarPorIdioma = new Button("Buscar por Idioma");
-        TextField txtBuscarAno = new TextField();
-        txtBuscarAno.setPromptText("Buscar Autores Vivos em Ano");
-        Button btnBuscarPorAno = new Button("Buscar por Ano");
+        TextField txtAnoInicial = new TextField();
+        txtAnoInicial.setPromptText("Ano Inicial");
+        TextField txtAnoFinal = new TextField();
+        txtAnoFinal.setPromptText("Ano Final");
+        Button btnBuscarPorAno = new Button("Buscar por Intervalo de Anos");
+        TextField txtDetalhesLivro = new TextField();
+        txtDetalhesLivro.setPromptText("Título do Livro para Detalhes");
+        Button btnDetalhesLivro = new Button("Ver Detalhes do Livro");
+        TextField txtDetalhesAutor = new TextField();
+        txtDetalhesAutor.setPromptText("Nome do Autor para Detalhes");
+        Button btnDetalhesAutor = new Button("Ver Detalhes do Autor");
         Button btnMediaDownloadsPorAutor = new Button("Média Downloads por Autor");
 
         btnListarLivros.setOnAction(event -> {
@@ -100,9 +109,9 @@ public class MainApp extends Application {
         });
 
         btnBuscarPorIdioma.setOnAction(event -> {
-            String idioma = txtBuscarIdioma.getText();
-            if (idioma.isEmpty()) {
-                Alert alert = new Alert(Alert.AlertType.WARNING, "Por favor, insira um idioma para buscar.", ButtonType.OK);
+            String idioma = comboBuscarIdioma.getValue();
+            if (idioma == null) {
+                Alert alert = new Alert(Alert.AlertType.WARNING, "Por favor, selecione um idioma para buscar.", ButtonType.OK);
                 alert.showAndWait();
             } else {
                 try {
@@ -118,14 +127,16 @@ public class MainApp extends Application {
         });
 
         btnBuscarPorAno.setOnAction(event -> {
-            String anoStr = txtBuscarAno.getText();
-            if (anoStr.isEmpty()) {
-                Alert alert = new Alert(Alert.AlertType.WARNING, "Por favor, insira um ano para buscar.", ButtonType.OK);
+            String anoInicialStr = txtAnoInicial.getText();
+            String anoFinalStr = txtAnoFinal.getText();
+            if (anoInicialStr.isEmpty() || anoFinalStr.isEmpty()) {
+                Alert alert = new Alert(Alert.AlertType.WARNING, "Por favor, insira ambos os anos para buscar.", ButtonType.OK);
                 alert.showAndWait();
             } else {
                 try {
-                    int ano = Integer.parseInt(anoStr);
-                    List<Autor> autores = autorService.listarAutoresVivosEmAno(ano);
+                    int anoInicial = Integer.parseInt(anoInicialStr);
+                    int anoFinal = Integer.parseInt(anoFinalStr);
+                    List<Autor> autores = autorService.listarAutoresVivosEmAno(anoInicial, anoFinal);
                     listView.getItems().clear();
                     for (Autor autor : autores) {
                         listView.getItems().add(autor.getNome() + " - " + autor.getNacionalidade());
@@ -133,7 +144,7 @@ public class MainApp extends Application {
                 } catch (IOException e) {
                     e.printStackTrace();
                 } catch (NumberFormatException e) {
-                    Alert alert = new Alert(Alert.AlertType.ERROR, "Ano inválido. Por favor, insira um número inteiro.", ButtonType.OK);
+                    Alert alert = new Alert(Alert.AlertType.ERROR, "Ano inválido. Por favor, insira números inteiros.", ButtonType.OK);
                     alert.showAndWait();
                 }
             }
@@ -153,20 +164,73 @@ public class MainApp extends Application {
             }
         });
 
+        btnDetalhesLivro.setOnAction(event -> {
+            String titulo = txtDetalhesLivro.getText();
+            if (titulo.isEmpty()) {
+                Alert alert = new Alert(Alert.AlertType.WARNING, "Por favor, insira um título para buscar detalhes.", ButtonType.OK);
+                alert.showAndWait();
+            } else {
+                try {
+                    Livro livro = livroService.buscarLivroDetalhado(titulo);
+                    if (livro != null) {
+                        listView.getItems().clear();
+                        listView.getItems().add("Título: " + livro.getTitulo());
+                        listView.getItems().add("Autor: " + livro.getAutor().getNome());
+                        listView.getItems().add("Ano de Publicação: " + livro.getAnoPublicacao());
+                        listView.getItems().add("Idioma: " + livro.getIdioma());
+                        listView.getItems().add("Downloads: " + livro.getDownloads());
+                    } else {
+                        Alert alert = new Alert(Alert.AlertType.INFORMATION, "Livro não encontrado.", ButtonType.OK);
+                        alert.showAndWait();
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        btnDetalhesAutor.setOnAction(event -> {
+            String nomeAutor = txtDetalhesAutor.getText();
+            if (nomeAutor.isEmpty()) {
+                Alert alert = new Alert(Alert.AlertType.WARNING, "Por favor, insira um nome de autor para buscar detalhes.", ButtonType.OK);
+                alert.showAndWait();
+            } else {
+                try {
+                    Autor autor = autorService.buscarAutorDetalhado(nomeAutor);
+                    if (autor != null) {
+                        listView.getItems().clear();
+                        listView.getItems().add("Nome: " + autor.getNome());
+                        listView.getItems().add("Data de Nascimento: " + autor.getDataNascimento());
+                        listView.getItems().add("Nacionalidade: " + autor.getNacionalidade());
+                    } else {
+                        Alert alert = new Alert(Alert.AlertType.INFORMATION, "Autor não encontrado.", ButtonType.OK);
+                        alert.showAndWait();
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
         VBox vbox = new VBox(
                 btnListarLivros,
                 btnListarAutores,
                 btnTop10Livros,
                 txtBuscarTitulo,
                 btnBuscarLivro,
-                txtBuscarIdioma,
+                comboBuscarIdioma,
                 btnBuscarPorIdioma,
-                txtBuscarAno,
+                txtAnoInicial,
+                txtAnoFinal,
                 btnBuscarPorAno,
+                txtDetalhesLivro,
+                btnDetalhesLivro,
+                txtDetalhesAutor,
+                btnDetalhesAutor,
                 btnMediaDownloadsPorAutor,
                 listView
         );
-        Scene scene = new Scene(vbox, 400, 600);
+        Scene scene = new Scene(vbox, 400, 700);
         primaryStage.setScene(scene);
         primaryStage.show();
     }
