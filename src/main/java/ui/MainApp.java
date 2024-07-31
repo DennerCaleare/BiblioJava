@@ -12,6 +12,7 @@ import service.LivroService;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Classe principal da aplicação JavaFX.
@@ -35,6 +36,10 @@ public class MainApp extends Application {
         TextField txtBuscarTitulo = new TextField();
         txtBuscarTitulo.setPromptText("Buscar Livro pelo Título");
         Button btnBuscarLivro = new Button("Buscar Livro");
+        TextField txtBuscarIdioma = new TextField();
+        txtBuscarIdioma.setPromptText("Buscar Livros por Idioma");
+        Button btnBuscarPorIdioma = new Button("Buscar por Idioma");
+        Button btnMediaDownloadsPorAutor = new Button("Média Downloads por Autor");
 
         btnListarLivros.setOnAction(event -> {
             try {
@@ -78,8 +83,49 @@ public class MainApp extends Application {
             }
         });
 
-        VBox vbox = new VBox(btnListarLivros, btnListarAutores, txtBuscarTitulo, btnBuscarLivro, listView);
-        Scene scene = new Scene(vbox, 400, 400);
+        btnBuscarPorIdioma.setOnAction(event -> {
+            String idioma = txtBuscarIdioma.getText();
+            if (idioma.isEmpty()) {
+                Alert alert = new Alert(Alert.AlertType.WARNING, "Por favor, insira um idioma para buscar.", ButtonType.OK);
+                alert.showAndWait();
+            } else {
+                try {
+                    List<Livro> livros = livroService.listarLivrosPorIdioma(idioma);
+                    listView.getItems().clear();
+                    for (Livro livro : livros) {
+                        listView.getItems().add(livro.getTitulo() + " - " + livro.getAutor().getNome());
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        btnMediaDownloadsPorAutor.setOnAction(event -> {
+            try {
+                Map<Autor, Double> mediaDownloadsPorAutor = livroService.calcularMediaDownloadsPorAutor();
+                listView.getItems().clear();
+                for (Map.Entry<Autor, Double> entry : mediaDownloadsPorAutor.entrySet()) {
+                    Autor autor = entry.getKey();
+                    Double mediaDownloads = entry.getValue();
+                    listView.getItems().add(autor.getNome() + " - Média de Downloads: " + mediaDownloads);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+
+        VBox vbox = new VBox(
+                btnListarLivros,
+                btnListarAutores,
+                txtBuscarTitulo,
+                btnBuscarLivro,
+                txtBuscarIdioma,
+                btnBuscarPorIdioma,
+                btnMediaDownloadsPorAutor,
+                listView
+        );
+        Scene scene = new Scene(vbox, 400, 500);
         primaryStage.setScene(scene);
         primaryStage.show();
     }
