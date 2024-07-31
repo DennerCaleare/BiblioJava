@@ -33,12 +33,16 @@ public class MainApp extends Application {
         ListView<String> listView = new ListView<>();
         Button btnListarLivros = new Button("Listar Livros");
         Button btnListarAutores = new Button("Listar Autores");
+        Button btnTop10Livros = new Button("Top 10 Livros Mais Baixados");
         TextField txtBuscarTitulo = new TextField();
         txtBuscarTitulo.setPromptText("Buscar Livro pelo Título");
         Button btnBuscarLivro = new Button("Buscar Livro");
         TextField txtBuscarIdioma = new TextField();
         txtBuscarIdioma.setPromptText("Buscar Livros por Idioma");
         Button btnBuscarPorIdioma = new Button("Buscar por Idioma");
+        TextField txtBuscarAno = new TextField();
+        txtBuscarAno.setPromptText("Buscar Autores Vivos em Ano");
+        Button btnBuscarPorAno = new Button("Buscar por Ano");
         Button btnMediaDownloadsPorAutor = new Button("Média Downloads por Autor");
 
         btnListarLivros.setOnAction(event -> {
@@ -61,6 +65,18 @@ public class MainApp extends Application {
                     listView.getItems().add(autor.getNome() + " - " + autor.getNacionalidade());
                 }
             } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+
+        btnTop10Livros.setOnAction(event -> {
+            try {
+                List<Livro> livros = livroService.listarTop10LivrosMaisBaixados();
+                listView.getItems().clear();
+                for (Livro livro : livros) {
+                    listView.getItems().add(livro.getTitulo() + " - " + livro.getAutor().getNome());
+                }
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         });
@@ -101,6 +117,28 @@ public class MainApp extends Application {
             }
         });
 
+        btnBuscarPorAno.setOnAction(event -> {
+            String anoStr = txtBuscarAno.getText();
+            if (anoStr.isEmpty()) {
+                Alert alert = new Alert(Alert.AlertType.WARNING, "Por favor, insira um ano para buscar.", ButtonType.OK);
+                alert.showAndWait();
+            } else {
+                try {
+                    int ano = Integer.parseInt(anoStr);
+                    List<Autor> autores = autorService.listarAutoresVivosEmAno(ano);
+                    listView.getItems().clear();
+                    for (Autor autor : autores) {
+                        listView.getItems().add(autor.getNome() + " - " + autor.getNacionalidade());
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (NumberFormatException e) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR, "Ano inválido. Por favor, insira um número inteiro.", ButtonType.OK);
+                    alert.showAndWait();
+                }
+            }
+        });
+
         btnMediaDownloadsPorAutor.setOnAction(event -> {
             try {
                 Map<Autor, Double> mediaDownloadsPorAutor = livroService.calcularMediaDownloadsPorAutor();
@@ -118,14 +156,17 @@ public class MainApp extends Application {
         VBox vbox = new VBox(
                 btnListarLivros,
                 btnListarAutores,
+                btnTop10Livros,
                 txtBuscarTitulo,
                 btnBuscarLivro,
                 txtBuscarIdioma,
                 btnBuscarPorIdioma,
+                txtBuscarAno,
+                btnBuscarPorAno,
                 btnMediaDownloadsPorAutor,
                 listView
         );
-        Scene scene = new Scene(vbox, 400, 500);
+        Scene scene = new Scene(vbox, 400, 600);
         primaryStage.setScene(scene);
         primaryStage.show();
     }
