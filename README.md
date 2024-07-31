@@ -34,7 +34,7 @@ O projeto está organizado nos seguintes pacotes:
 
 1. **Clonar o repositório:**
    ```bash
-   git clone https://github.com/<USERNAME>/BiblioJava.git
+   git clone https://github.com/DennerCaleare/BiblioJava.git
    cd BiblioJava
 
 2. **Abrir o projeto no IntelliJ IDEA:**
@@ -45,15 +45,6 @@ O projeto está organizado nos seguintes pacotes:
     ```bash
    Vá para "File" > "Project Structure" > "Project" e configure o JDK para Java 11 ou superior.
 
-## Contribuição
-
-Contribuições são bem-vindas! Siga os passos abaixo para contribuir com o projeto:
-
-1. **Faça um Fork do projeto**
-2. **Crie uma branch para sua feature** (`git checkout -b feature/AmazingFeature`)
-3. **Commit suas mudanças** (`git commit -m 'Add some AmazingFeature'`)
-4. **Push para a branch** (`git push origin feature/AmazingFeature`)
-5. **Abra um Pull Request**
 
 ## Licença
 
