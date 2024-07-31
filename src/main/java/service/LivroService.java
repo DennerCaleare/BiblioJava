@@ -1,6 +1,7 @@
 package service;
 
 import dao.FileUtil;
+import dao.GutendexAPI;
 import model.Autor;
 import model.Livro;
 
@@ -14,6 +15,12 @@ import java.util.stream.Collectors;
  * Classe de serviço para manipulação de livros.
  */
 public class LivroService {
+
+    private GutendexAPI gutendexAPI;
+
+    public LivroService() {
+        this.gutendexAPI = new GutendexAPI();
+    }
 
     /**
      * Lista todos os livros registrados.
@@ -65,5 +72,16 @@ public class LivroService {
         }
 
         return mediaDownloadsPorAutor;
+    }
+
+    /**
+     * Busca livros pelo título utilizando a API Gutendex.
+     *
+     * @param titulo o título do livro a ser buscado
+     * @return uma lista de livros correspondentes ao título
+     * @throws Exception se ocorrer um erro na requisição HTTP
+     */
+    public List<Livro> buscarLivrosPorTitulo(String titulo) throws Exception {
+        return gutendexAPI.buscarLivrosPorTitulo(titulo);
     }
 }
